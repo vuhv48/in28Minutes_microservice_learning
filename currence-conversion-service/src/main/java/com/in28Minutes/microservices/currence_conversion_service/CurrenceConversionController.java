@@ -1,5 +1,6 @@
 package com.in28Minutes.microservices.currence_conversion_service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,6 +12,10 @@ import java.util.HashMap;
 
 @RestController
 public class CurrenceConversionController {
+	
+	@Autowired
+	private CurrenceExchangeProxy currenceExchangeProxy;
+	
     @GetMapping("/currency-conversion/from/{from}/to/{to}/quantity/{quantity}")
     public CurrenceConversion calculatorCurrenceConversion(
             @PathVariable String from,
@@ -25,5 +30,20 @@ public class CurrenceConversionController {
         CurrenceConversion currenceConversion  =responseEntity.getBody();
         return new CurrenceConversion(1000L,from, to, quantity, BigDecimal.ONE, BigDecimal.ONE
                 , currenceConversion.getEnvironment());
+    }
+    
+    
+    @GetMapping("/currency-conversion-feign/from/{from}/to/{to}/quantity/{quantity}")
+    public CurrenceConversion calculatorCurrenceConversionFeign(
+            @PathVariable String from,
+            @PathVariable String to,
+            @PathVariable BigDecimal quantity
+    ){
+        
+    	CurrenceConversion currenceConversion = currenceExchangeProxy.retrieveExchangeValue(from, to);
+        
+        return new CurrenceConversion(1000L,from, to, quantity, BigDecimal.ONE, BigDecimal.ONE
+                , currenceConversion.getEnvironment());
+
     }
 }
